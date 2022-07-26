@@ -5,10 +5,7 @@ const cartItemSchema = new mongoose.Schema({
   image: String,
   price: Number,
   size: String,
-  quantityOfItem: {
-    type: Number,
-    default: 1
-  }
+  qty:Number
 })
 const CartItem = mongoose.model('CartItem', cartItemSchema)
 module.exports = CartItem

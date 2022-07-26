@@ -27,7 +27,8 @@ const userSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'CartItem'
         }
-    ]
+    ],
+    ref: Number
 
 })
 
@@ -37,10 +38,10 @@ userSchema.pre('save', async function (next) {
     next()
   })
   
-
   
-userSchema.methods.correctPassword = async(candidatePaswword, userPassword) => {
- return await bcrypt.comparePassword(candidatePaswword, userPassword)
+userSchema.methods.correctPassword = async(candidatePassword, userPassword) => {
+return await bcrypt.compare(candidatePassword, userPassword)
+ 
 }
 
 const User = mongoose.model('User', userSchema)

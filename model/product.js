@@ -11,7 +11,11 @@ const productSchema = new mongoose.Schema(
         price:Number,
         sizes: [
             String
-        ]
+        ],
+        similarProducts: [
+            Object
+        ],
+        rating: Number
     }
 )
 

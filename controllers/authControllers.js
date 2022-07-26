@@ -15,7 +15,6 @@ if (process.env.NODE_ENV === 'production') cookieOptions.secure = true
 
 const createAndSendToken = (user, res) => {
   const token = signToken(user._id)
-  res.cookie('jwt', token, cookieOptions)
 
   res.status(201).json({ user, token })
 }
@@ -26,9 +25,9 @@ const signup = async (req, res) => {
     const { firstName, lastName, password, email } = req.body
     const userObject = { firstName, lastName, password, email }
 
-    if (!firstName || !firstName || !password) return res.status(400).json('Please provide valid details')
+    if (!firstName || !lastName || !password) return res.status(400).json('Please provide valid details')
     const existingUser = await User.findOne({ firstName, lastName })
-    if (existingUser) return res.json({ message: 'User already exist' })
+    if (existingUser) return res.json({status: 'fail', message: 'User already exist' })
 
     const user = await User.create(userObject)
 
@@ -39,47 +38,46 @@ const signup = async (req, res) => {
   }
 }
 
-const login = async (req, res, next) => {
+const login = async (req, res) => {
   try {
     const { email, password } = req.body
 
     // check if user exist
-    if (!email || !password) return res.status(400).json({message: 'Please provide email and password'})
+    if (!email || !password) return res.status(400).json({status: 'fail', message: 'Please provide email and password'})
     const foundUser = await User.findOne({ email })
+   
 
     // check if password is correct
     if (!foundUser || !await foundUser.correctPassword(password, foundUser.password)) 
-      return res.status(401).json({message: 'Incorrect login details'})
+      return res.status(401).json({status: 'fail', message: 'Incorrect login details'})
     
 
     // login user, send jwt
     createAndSendToken(foundUser, res)
   } catch (err) {
-    res.status(500).json({ message: 'something went wrong' })
+    res.status(500).json({ status: 'fail', message: 'something went wrong' })
   }
 }
 
-const protect = async (req, res, next) => {
+const isLoggedIn = async (req, res, next) => {
   try {
     let token
-    if (req.header.authorization && req.header.authorization.startsWith('Bearer')) {
-      token = req.header.authorization.split(' ')[1]
-    }
-    else if (req.cookies.jwt){
-      token = req.cookies.jwt
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+       token = req.headers.authorization.split(' ')[1]
     }
     const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET)
-    if (!decoded) return res.status(401).json({message: 'You are not logged in. Try again after you log in'})
-
+    
     const foundUser = await User.findById(decoded.id)
-    if (!foundUser) return res.status(401).json({message: 'User with that token does not exist'})
+    if (!foundUser) return res.status(401).json({status: 'fail', message: 'User with that token does not exist'})
 
     req.user = foundUser
     next()
   } catch (err) {
+    if(err.name === 'TokenExpiredError' )return res.status(401).json({ message: 'Please login' })
+    if(err.name === 'JsonWebTokenError' )return res.status(401).json({ message: 'Please login' })
     res.status(500).json({ message: 'something went wrong' })
   }
 }
 
 
-module.exports = { signup, login, protect }
+module.exports = { signup, login, isLoggedIn}

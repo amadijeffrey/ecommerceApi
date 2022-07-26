@@ -1,13 +1,20 @@
 const router = require('express').Router()
-const { getAllProducts, getProduct, getProductsUnderCategory, searchForProduct, createProduct, addProductToCart} = require('../controllers/productControllers')
-const {protect} = require('../controllers/authControllers')
+const { getFeaturedProducts, getProduct, getProductsUnderCategory,
+     searchForProduct, createProduct, addProductToCart, addReferenceToUser, 
+    deleteCartItem, updateCartItem} = require('../controllers/productControllers')
+const {isLoggedIn} = require('../controllers/authControllers')
 
-router.get('/', getAllProducts)
+router.get('/featured', getFeaturedProducts)
 router.get('/category', getProductsUnderCategory)
 router.get('/search', searchForProduct)
 router.get('/:id', getProduct)
 router.post('/create', createProduct)
-router.post('/cart/add',protect,  addProductToCart)
+router.post('/cart/add', isLoggedIn,  addProductToCart)
+router.delete('/cart/delete/:id', isLoggedIn,  deleteCartItem)
+router.patch('/cart/:id', isLoggedIn,  updateCartItem)
+router.post('/payment/reference', isLoggedIn, addReferenceToUser )
+
+
 
 
 module.exports = router

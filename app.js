@@ -2,20 +2,18 @@ const express = require('express')
 const cors = require('cors')
 const app = express()
 require('dotenv').config()
-const port = 3030
 const path = require('path')
 const productRoutes = require('./routes/productRoutes')
 const authRoutes = require('./routes/authRoutes')
 const mongoose = require('mongoose')
-const cookieParser = require('cookie-parser')
+const helmet = require('helmet')
+const {port, DB} = require('./config')
 
-
-
-
-mongoose.connect(process.env.MONGODB_URL,{useNewUrlParser: true, useUnifiedTopology: true}, ()=> {
+mongoose.connect(DB,{useNewUrlParser: true, useUnifiedTopology: true}, ()=> {
     console.log('DB connected')
 })
 
+app.use(helmet())
 app.use(cors({
     origin: '*', 
     optionSuccessStatus:200
@@ -24,15 +22,13 @@ app.use(cors({
 app.use(express.static(path.join(__dirname,'build')))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-app.use(cookieParser())
 
 app.use('/api/products', productRoutes)
 app.use(authRoutes)
 
-app.get('*', (req,res) => {
+app.get('*', (res) => {
     res.sendFile(path.join(__dirname,'build', 'index.html'))
 })
-
 
 app.listen(port, () => {
     console.log('server is running')

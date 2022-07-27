@@ -1,17 +1,13 @@
 const jwt = require('jsonwebtoken')
 const { promisify } = require('util')
 const User = require('../model/user')
+const {jwtSecretKey, jwtExpiry} = require('../config')
+
 
 const signToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN })
+  return jwt.sign({ id }, jwtSecretKey, { expiresIn: jwtExpiry })
 }
 
-const cookieOptions = {
-  expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 60 * 60 * 1000),
-  httpOnly: true
-}
-
-if (process.env.NODE_ENV === 'production') cookieOptions.secure = true
 
 const createAndSendToken = (user, res) => {
   const token = signToken(user._id)
@@ -65,7 +61,7 @@ const isLoggedIn = async (req, res, next) => {
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
        token = req.headers.authorization.split(' ')[1]
     }
-    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET)
+    const decoded = await promisify(jwt.verify)(token, jwtSecretKey)
     
     const foundUser = await User.findById(decoded.id)
     if (!foundUser) return res.status(401).json({status: 'fail', message: 'User with that token does not exist'})

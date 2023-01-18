@@ -7,7 +7,8 @@ const productRoutes = require('./routes/productRoutes')
 const authRoutes = require('./routes/authRoutes')
 const mongoose = require('mongoose')
 const helmet = require('helmet')
-const {port, DB} = require('./config')
+const {DB} = require('./config')
+const port = process.env.PORT || 3030
 
 mongoose.connect(DB,{useNewUrlParser: true, useUnifiedTopology: true}, ()=> {
     console.log('DB connected')

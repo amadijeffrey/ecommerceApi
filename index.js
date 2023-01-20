@@ -27,10 +27,13 @@ app.use('/api/products', productRoutes)
 app.use(authRoutes)
 
 
-
+app.get('/health', (req,res) => {
+ res.send({'message': "okay"})
+})
 app.listen(port, () => {
     console.log('server is running')
 })
+
 
 
 

@@ -9,7 +9,7 @@ enviroment.development = {
 }
 
 enviroment.production = {
-    'port':process.env.PORT || 3030,
+    'port':process.env.PORT,
     'envName':'production',
     'DB': process.env.DB_URL,
     'jwtSecretKey': process.env.JWT_SECRET,
